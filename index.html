@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alek Habecker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080b0f;
+      --bg2: #0d1117;
+      --border: rgba(255,255,255,0.07);
+      --accent: #7eb8a4;
+      --accent2: #9b8fc4;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --card: rgba(255,255,255,0.03);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 4rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,11,15,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 4rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(126,184,164,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(126,184,164,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -20%;
+      left: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(126,184,164,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-glow2 {
+      position: absolute;
+      top: 10%;
+      right: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(155,143,196,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.2s;
+    }
+
+    .hero-name {
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.4s;
+    }
+
+    .hero-name span {
+      display: block;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .hero-desc {
+      max-width: 520px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.6s;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.8s;
+    }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 6rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 60px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.4;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+
+    .about-text p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 1.25rem;
+    }
+
+    .about-text p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .stat {
+      background: var(--bg2);
+      padding: 1.5rem;
+    }
+
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* INTERESTS */
+    .interests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    .interest-card {
+      background: var(--bg2);
+      padding: 2rem 1.5rem;
+      transition: background 0.2s;
+    }
+
+    .interest-card:hover {
+      background: rgba(126,184,164,0.04);
+    }
+
+    .interest-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      opacity: 0.6;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .interest-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* RESEARCH */
+    .research-list {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .research-item {
+      background: var(--bg2);
+      padding: 2rem 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: start;
+      transition: background 0.2s;
+    }
+
+    .research-item:hover { background: rgba(255,255,255,0.02); }
+
+    .research-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .research-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .research-desc {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .research-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+      align-self: start;
+    }
+
+    .tag-active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* PROJECTS */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    .project-card {
+      background: var(--bg2);
+      padding: 2rem;
+      transition: background 0.2s;
+    }
+
+    .project-card:hover { background: rgba(255,255,255,0.02); }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .project-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .project-desc {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tech-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      background: rgba(126,184,164,0.06);
+      color: var(--accent);
+      border-radius: 1px;
+    }
+
+    /* SKILLS */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    .skill-group {
+      background: var(--bg2);
+      padding: 2rem;
+    }
+
+    .skill-group-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skill-item {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 1px;
+      transition: all 0.2s;
+    }
+
+    .skill-item:hover {
+      border-color: rgba(74,240,196,0.3);
+      color: var(--text);
+    }
+
+    /* CONTACT */
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+      margin-top: 3rem;
+    }
+
+    .contact-text {
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+
+    .contact-text span { color: var(--accent); }
+
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .contact-link {
+      background: var(--bg2);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .contact-link:hover { background: rgba(126,184,164,0.05); }
+
+    .contact-link-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .contact-link:hover .contact-link-label { color: var(--accent); }
+
+    .contact-link-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+
+    .arrow { color: var(--accent); margin-left: 0.5rem; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 4rem;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .hero { padding: 0 1.5rem 4rem; }
+      .about-grid, .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .divider { margin: 0 1.5rem; }
+      footer { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">AH_</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+    <p class="hero-tag">// Computer Engineering · DePauw × WashU</p>
+    <h1 class="hero-name">
+      Alek<br>
+      <span>Habecker</span>
+    </h1>
+    <p class="hero-desc">
+      Science Research Fellow studying complex systems, neuromorphic architectures,
+      and the mathematics of physical computation.
+      DePauw University · Washington University in St. Louis · Class of 2029.
+    </p>
+    <div class="hero-links">
+      <a href="#research" class="btn btn-primary">View Research →</a>
+      <a href="https://github.com/AlekHabecker" target="_blank" class="btn btn-ghost">GitHub</a>
+      <a href="https://linkedin.com/in/alek-habecker" target="_blank" class="btn btn-ghost">LinkedIn</a>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label">01 · About</p>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I'm a <strong>Computer Engineering student</strong> pursuing a dual degree between
+          DePauw University and Washington University in St. Louis, expected May 2029.
+          I'm a <strong>Science Research Fellow</strong> — a competitive undergraduate research
+          program in computational and natural sciences.
+        </p>
+        <p>
+          My work sits at the boundary of mathematics, physics, and computing. I'm drawn
+          to problems where <strong>rigorous quantitative methods</strong> meet real-world systems —
+          from prosthetics fitting protocols to autonomous vehicle AI integration.
+        </p>
+        <p>
+          This summer I'll be at <strong>Purdue University</strong> working with Dr. Sam Labi
+          on autonomous vehicle systems, with access to Purdue's AI Institute and
+          computational research infrastructure.
+        </p>
+        <p>
+          I speak <strong>English</strong> natively and <strong>Chinese</strong> conversationally,
+          with reading proficiency.
+        </p>
+      </div>
+      <div>
+        <div class="about-stats">
+          <div class="stat">
+            <div class="stat-num">36</div>
+            <div class="stat-label">ACT Superscore</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">3×</div>
+            <div class="stat-label">Dean's List</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">2</div>
+            <div class="stat-label">Universities</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">1</div>
+            <div class="stat-label">Publication Incoming</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- INTERESTS -->
+  <section id="interests">
+    <p class="section-label">02 · Research Interests</p>
+    <div class="interests-grid">
+      <div class="interest-card">
+        <div class="interest-num">01</div>
+        <div class="interest-name">Information Theory in Physical Systems</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-num">02</div>
+        <div class="interest-name">Computational Plasma Physics</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-num">03</div>
+        <div class="interest-name">Complex Systems & Nonlinear Dynamics</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-num">04</div>
+        <div class="interest-name">Neuromorphic Computing Architectures</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-num">05</div>
+        <div class="interest-name">Quantum Computing</div>
+      </div>
+      <div class="interest-card">
+        <div class="interest-num">06</div>
+        <div class="interest-name">Mathematical Modeling & Simulation</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- RESEARCH -->
+  <section id="research">
+    <p class="section-label">03 · Research & Presentations</p>
+    <div class="research-list">
+
+      <div class="research-item">
+        <div>
+          <div class="research-date">Aug 2025 – Present · Zionsville, IN</div>
+          <div class="research-title">Prosthetics Modeling — Indiana Institute for Prosthetics</div>
+          <div class="research-desc">
+            Conducting retrospective data analysis on post-surgical below-knee amputation
+            limb circumference patterns. Analyzing clinical patient records to identify
+            statistical patterns in limb volume changes. Collaborating with CEO Matthew
+            Habecker to improve prosthetic fitting protocols.
+          </div>
+        </div>
+        <span class="research-tag tag-active">Publication Spring 2026</span>
+      </div>
+
+      <div class="research-item">
+        <div>
+          <div class="research-date">Mar 27–29, 2026 · Naperville, IL</div>
+          <div class="research-title">Poster Presenter — ASIANetwork 2026 Convention</div>
+          <div class="research-desc">
+            "Revolutionizing the AI Landscape: The Emergence of China's DeepSeek."
+            Analyzing the performance and development of DeepSeek large language models
+            and the implications of Chinese AI advancement in the global LLM landscape.
+            Faculty Mentor: Dr. Anqi Liu, DePauw University.
+          </div>
+        </div>
+        <span class="research-tag tag-active">Conference</span>
+      </div>
+
+      <div class="research-item">
+        <div>
+          <div class="research-date">Aug 2024 – Present · Greencastle, IN</div>
+          <div class="research-title">Science Research Fellow — DePauw University</div>
+          <div class="research-desc">
+            Competitively selected undergraduate research fellowship in computational
+            and natural sciences. Completing 8–10 weeks of summer research, advanced
+            research tools workshops, ethics training, and research methodology seminars.
+          </div>
+        </div>
+        <span class="research-tag">Fellowship</span>
+      </div>
+
+      <div class="research-item">
+        <div>
+          <div class="research-date">Summer 2026 · West Lafayette, IN</div>
+          <div class="research-title">Research Assistant — Purdue University (Dr. Sam Labi)</div>
+          <div class="research-desc">
+            Incoming summer researcher working on autonomous vehicle systems including
+            go-kart, rally car, boat, and full-size race car platforms. Exploring AI
+            integration pathways with access to Purdue's AI Institute and computational tools.
+          </div>
+        </div>
+        <span class="research-tag tag-active">Upcoming</span>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label">04 · Technical Projects</p>
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-header">
+          <div class="project-title">IoT Sensor Data Pipeline<br>with LoRa Communication</div>
+        </div>
+        <p class="project-desc">
+          Configured LoRa HAT (SX1262) on Raspberry Pi for long-range wireless
+          transmission. Developed Python sensor simulation generating realistic
+          electrical power data from 20 sensors across 5 machines at 300KB/hour.
+          Programmed ESP32 microcontroller as LoRa-to-USB gateway. Integrated
+          Azure Blob Storage for cloud data persistence.
+        </p>
+        <div class="tech-stack">
+          <span class="tech-tag">Python</span>
+          <span class="tech-tag">C++ / Arduino</span>
+          <span class="tech-tag">Raspberry Pi</span>
+          <span class="tech-tag">ESP32</span>
+          <span class="tech-tag">Azure</span>
+          <span class="tech-tag">LoRa</span>
+          <span class="tech-tag">SPI/GPIO</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label">05 · Skills</p>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <div class="skill-group-title">Programming</div>
+        <div class="skill-list">
+          <span class="skill-item">Java</span>
+          <span class="skill-item">Python</span>
+          <span class="skill-item">C++ / Arduino</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Cloud & Platforms</div>
+        <div class="skill-list">
+          <span class="skill-item">Azure Blob Storage</span>
+          <span class="skill-item">Azure Functions</span>
+          <span class="skill-item">Cosmos DB</span>
+          <span class="skill-item">Raspberry Pi</span>
+          <span class="skill-item">ESP32</span>
+          <span class="skill-item">Git / GitHub</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Technical</div>
+        <div class="skill-list">
+          <span class="skill-item">Linux / Terminal</span>
+          <span class="skill-item">IoT Integration</span>
+          <span class="skill-item">LoRa / Wireless</span>
+          <span class="skill-item">SPI / GPIO</span>
+          <span class="skill-item">SQL</span>
+          <span class="skill-item">JSON</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Mathematics</div>
+        <div class="skill-list">
+          <span class="skill-item">Calculus III</span>
+          <span class="skill-item">Differential Equations</span>
+          <span class="skill-item">Linear Algebra</span>
+          <span class="skill-item">Statistics</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">06 · Contact</p>
+    <div class="contact-inner">
+      <div class="contact-text">
+        Let's talk about<br>
+        <span>research, computing,</span><br>
+        or collaboration.
+      </div>
+      <div class="contact-links">
+        <a href="mailto:alekhabecker_2028@depauw.edu" class="contact-link">
+          <span class="contact-link-label">Email</span>
+          <span class="contact-link-value">alekhabecker_2028@depauw.edu <span class="arrow">→</span></span>
+        </a>
+        <a href="https://github.com/AlekHabecker" target="_blank" class="contact-link">
+          <span class="contact-link-label">GitHub</span>
+          <span class="contact-link-value">AlekHabecker <span class="arrow">→</span></span>
+        </a>
+        <a href="https://linkedin.com/in/alek-habecker" target="_blank" class="contact-link">
+          <span class="contact-link-label">LinkedIn</span>
+          <span class="contact-link-value">alek-habecker <span class="arrow">→</span></span>
+        </a>
+        <a href="tel:3173735518" class="contact-link">
+          <span class="contact-link-label">Phone</span>
+          <span class="contact-link-value">317-373-5518 <span class="arrow">→</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Alek Habecker</p>
+    <p>alekhabecker.com</p>
+  </footer>
+
+</body>
+</html>
